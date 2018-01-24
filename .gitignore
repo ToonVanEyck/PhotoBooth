@@ -1,0 +1,4 @@
+*.bmp
+.project
+.pydevproject
+__pycache__
