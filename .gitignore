@@ -1,4 +1,9 @@
 *.bmp
+
 .project
+
 .pydevproject
+
 __pycache__
+
+*.pdf
