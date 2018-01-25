@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import math
 from win_printer import print_capabilities, print_image, init_printer,  open_printer, close_printer, get_printer_config
+from qr_gen import gen_vouchers_codes, store_voucher_codes
 import win32con
 from time import sleep
 
