@@ -1,0 +1,27 @@
+[setup]
+    # mode can be either "voucher" or "free"
+    mode            : voucher
+    printer         : Microsoft Print to PDF
+    media_format    : 5
+    num_pictures    : 4
+    display_res     : 1920,1080
+
+[overlays]
+    global_overlay  : /
+    idle_overlay    : Idle/1920x1080/totem.png
+    scan_overlay    : Idle/1920x1080/scan.png
+    accept_overlay  : Idle/1920x1080/accept.png
+    deny_overlay    : Idle/1920x1080/deny.png
+    countdown_dir   : Countdown/1920x1080/totem_
+    
+[output]
+    template        : Print/9x6 inch/bicky_bier.png
+    img_area        :   [0:900, 0:1200],
+                        [900:1800, 0:1200],
+                        [0:900, 1500:2700],
+                        [900:1800, 1500:2700]
+    to_print        : Output/picture_total.bmp
+    
+[voucher gen]
+    template        : Vouchers/Template/BickyBier.png
+    qr_size         : 3
