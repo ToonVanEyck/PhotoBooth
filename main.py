@@ -1,20 +1,34 @@
 import threading
 import cv2
+import shelve
 import numpy as np
 import math
 from win_printer import print_capabilities, print_image, init_printer,  open_printer, close_printer, get_printer_config
+from qr_gen import gen_vouchers_codes, store_voucher_codes
 import win32con
+from pyzbar.pyzbar import decode
+from pyzbar.pyzbar import ZBarSymbol
 from time import sleep
+import code
 
-def start_countdown_timer():
-    t = threading.Timer(countdown_delay, countdown)
+def start_timer(time,func):
+    t = threading.Timer(time,func)
     t.start()
+
+def goto_scan():
+    global state
+    state = "scan"
+    
+def goto_init_countdown():
+    global state
+    state = "init_countdown"
 
 def countdown():
     global countdown_val
+    global countdown_delay
     countdown_val -= 1
     if countdown_val > 0:
-        start_countdown_timer()
+        start_timer(countdown_delay,countdown)
 
 def overlay(over):
     if over != None:
@@ -42,6 +56,15 @@ new_overlay_size = (math.ceil(overlay_size[0]/(overlay_size[1]/camera_resolution
 # IDLE overlay
 idle_overlay       = "Idle/1920x1080/totem.png"
 idle_overlay_alpha = "Idle/1920x1080/totem_alpha.png"
+# SCAN overlay
+scan_overlay       = "Idle/1920x1080/scan.png"
+scan_overlay_alpha = "Idle/1920x1080/scan_alpha.png"
+# ACCEPT overlay
+accept_overlay       = "Idle/1920x1080/accept.png"
+accept_overlay_alpha = "Idle/1920x1080/accept_alpha.png"
+# DENY overlay
+deny_overlay       = "Idle/1920x1080/deny.png"
+deny_overlay_alpha = "Idle/1920x1080/deny_alpha.png"
 # COUNTDOWN overlay directory
 countdown_directory = "Countdown/1920x1080/totem_"
 countdown_delay = 0.1
@@ -67,11 +90,22 @@ foto_printer_name = "MITSUBISHI CP9550D/DW(USB)"
 #  paper_size = 7 # (2x6"x2)  | A5            # 520x1580
 paper_size = 5
 printer_name = foto_printer_name
+# Start_state
+start_state = "scan"
 # ------ LOAD OVERLAYS ------
 roi_width_shift = int((new_overlay_size[0]-camera_resolution[0])/2)
 idle_overlay_img        = cv2.resize(cv2.imread(idle_overlay),new_overlay_size)[0:camera_resolution[1], roi_width_shift:roi_width_shift+camera_resolution[0]]
 idle_overlay_img_alpha  = cv2.resize(cv2.imread(idle_overlay_alpha),new_overlay_size)[0:camera_resolution[1], roi_width_shift:roi_width_shift+camera_resolution[0]]
 idle = (idle_overlay_img,idle_overlay_img_alpha)
+scan_overlay_img        = cv2.resize(cv2.imread(scan_overlay),new_overlay_size)[0:camera_resolution[1], roi_width_shift:roi_width_shift+camera_resolution[0]]
+scan_overlay_img_alpha  = cv2.resize(cv2.imread(scan_overlay_alpha),new_overlay_size)[0:camera_resolution[1], roi_width_shift:roi_width_shift+camera_resolution[0]]
+scan = (scan_overlay_img,scan_overlay_img_alpha)
+accept_overlay_img        = cv2.resize(cv2.imread(accept_overlay),new_overlay_size)[0:camera_resolution[1], roi_width_shift:roi_width_shift+camera_resolution[0]]
+accept_overlay_img_alpha  = cv2.resize(cv2.imread(accept_overlay_alpha),new_overlay_size)[0:camera_resolution[1], roi_width_shift:roi_width_shift+camera_resolution[0]]
+accept = (accept_overlay_img,accept_overlay_img_alpha)
+deny_overlay_img        = cv2.resize(cv2.imread(deny_overlay),new_overlay_size)[0:camera_resolution[1], roi_width_shift:roi_width_shift+camera_resolution[0]]
+deny_overlay_img_alpha  = cv2.resize(cv2.imread(deny_overlay_alpha),new_overlay_size)[0:camera_resolution[1], roi_width_shift:roi_width_shift+camera_resolution[0]]
+deny = (deny_overlay_img,deny_overlay_img_alpha)
 cd_3_overlay_img        = cv2.resize(cv2.imread(countdown_directory + "3.png"),new_overlay_size)[0:camera_resolution[1], roi_width_shift:roi_width_shift+camera_resolution[0]]
 cd_3_overlay_img_alpha  = cv2.resize(cv2.imread(countdown_directory + "3_alpha.png"),new_overlay_size)[0:camera_resolution[1], roi_width_shift:roi_width_shift+camera_resolution[0]]
 cd_3 = (cd_3_overlay_img ,cd_3_overlay_img_alpha )
@@ -84,7 +118,7 @@ cd_1 = (cd_1_overlay_img ,cd_1_overlay_img_alpha )
 cd = (cd_1,cd_2,cd_3)
 # ------ INIT --------
 my_window = "PhotoBooth" 
-state = "idle"
+state = start_state
 countdown_val = 0
 overlay_img_file = ""
 overlay_img_alpha_file = ""
@@ -93,6 +127,7 @@ nr_of_pictures = 4
 output_picture = []
 total_output_img = np.zeros((total_output_img_size[1],total_output_img_size[0],3),np.uint8)
 init_printer(printer_name,paper_size,win32con.DMORIENT_LANDSCAPE)
+v_shelve = shelve.open("Vouchers/data/vouchers")
 printer = open_printer(printer_name)
 print(get_printer_config(printer[0]))
 
@@ -104,15 +139,34 @@ cv2.namedWindow(my_window)#,cv2.WINDOW_NORMAL)
 cv2.setMouseCallback(my_window, start)
 
 
+
 while True:
-    ret_val, img = cam.read()
-    img = cv2.flip(img, 1)
+    ret_val, capture = cam.read()
+    img = cv2.flip(capture, 1)
     if state == "idle":
-        overlay_img = idle
+        overlay_img = idle 
         # got to next state by clicking screen => start()
+    elif state == "scan":
+        overlay_img = scan 
+        code = decode(capture,symbols=[ZBarSymbol.QRCODE])
+        if len(code) == 1:
+            if v_shelve[code[0].data.decode("utf-8")] == "NEW":
+                v_shelve[code[0].data.decode("utf-8")] = "USED"
+                print("ok")
+                state = "scan_accept"
+            else:
+                state = "scan_deny"
+    elif state == "scan_accept":
+        overlay_img = accept 
+        start_timer(3,goto_init_countdown)
+        state = "wait"
+    elif state == "scan_deny":
+        overlay_img = deny 
+        start_timer(3,goto_scan)
+        state = "wait"
     elif state == "init_countdown":
-        countdown_val=3
-        start_countdown_timer()
+        countdown_val=4
+        countdown()
         state = "countdown"
     elif state == "countdown":
         if countdown_val !=0:
@@ -156,12 +210,14 @@ while True:
         state = "end"
     elif state == "end":
         break
-
+    else:
+        pass
     overlay(overlay_img)
     cv2.imshow(my_window, img)
 
     
     if cv2.waitKey(1) == 27: 
+        v_shelve.close()
         break  # esc to quit
 cv2.destroyAllWindows()
 
