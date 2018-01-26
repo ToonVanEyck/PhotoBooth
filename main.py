@@ -6,6 +6,7 @@ import math
 from win_printer import print_capabilities, print_image, init_printer,  open_printer, close_printer, get_printer_config
 from qr_gen import gen_vouchers_codes, store_voucher_codes
 import win32con
+import win32print
 from pyzbar.pyzbar import decode
 from pyzbar.pyzbar import ZBarSymbol
 from time import sleep
@@ -89,7 +90,7 @@ foto_printer_name = "MITSUBISHI CP9550D/DW(USB)"
 #  paper_size = 6 # (2x6"x2)  | A4            # 1040x1580
 #  paper_size = 7 # (2x6"x2)  | A5            # 520x1580
 paper_size = 5
-printer_name = foto_printer_name
+printer_name = pdf_printer_name
 # Start_state
 start_state = "scan"
 # ------ LOAD OVERLAYS ------
@@ -128,8 +129,10 @@ output_picture = []
 total_output_img = np.zeros((total_output_img_size[1],total_output_img_size[0],3),np.uint8)
 init_printer(printer_name,paper_size,win32con.DMORIENT_LANDSCAPE)
 v_shelve = shelve.open("Vouchers/data/vouchers")
-printer = open_printer(printer_name)
-print(get_printer_config(printer[0]))
+
+PRINTER_DEFAULTS = {"DesiredAccess":win32print.PRINTER_ALL_ACCESS} 
+printer = win32print.OpenPrinter(printer_name,PRINTER_DEFAULTS)
+print(get_printer_config(printer))
 
 cam = cv2.VideoCapture(0)
 cam.set(cv2.CAP_PROP_FRAME_WIDTH,camera_resolution[0])
