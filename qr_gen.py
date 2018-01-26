@@ -70,7 +70,7 @@ def generate_voucher_pdf(pdf_file,voucher_codes,design):
         canv.showPage()
     canv.save()
 
-# codes = gen_vouchers_codes("Toon",10)
+# codes = gen_vouchers_codes("Toon",200)
 # store_voucher_codes(codes,"Vouchers/data/vouchers")
 # design =(3.1,black,None,"Vouchers/Template/BickyBier.png")
 # generate_voucher_pdf("Vouchers/vouchers.pdf",codes,design)

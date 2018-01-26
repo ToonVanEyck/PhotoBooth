@@ -1,4 +1,6 @@
-pypiwin32=222
-opencv-python==3.4.0.12
-pyqrcode==1.2.1
+pypiwin32
+pywin32
+opencv-python
+pyqrcode
 pyzbar
+reportlab
