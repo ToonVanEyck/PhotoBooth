@@ -25,7 +25,7 @@ def open_printer(printer_name):
     pHandle = win32print.OpenPrinter(printer_name, PRINTER_DEFAULTS)
     properties = win32print.GetPrinter(pHandle,2)
     pdevmode = properties["pDevMode"]
-    print_processor = properties['pPrintProcessor']      # TODO FIX THIS
+    print_processor = properties['pPrintProcessor']
     printer_handle=win32gui.CreateDC(print_processor,printer_name,None) 
     return (printer_handle,pHandle)
 

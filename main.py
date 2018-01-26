@@ -12,6 +12,12 @@ from pyzbar.pyzbar import ZBarSymbol
 from time import sleep
 import code
 
+def load_img(file,size):
+    img= cv2.imread(file,cv2.IMREAD_UNCHANGED)
+    x,y = img.shape[0:2]
+    img = cv2.resize(img,size)
+    return img[0:x,0:y,0:3],img[0:x,0:y,3]
+
 def start_timer(time,func):
     t = threading.Timer(time,func)
     t.start()
@@ -34,10 +40,13 @@ def countdown():
 def overlay(over):
     if over != None:
         overlay_img, overlay_img_alpha = over
+        print(overlay_img.shape,overlay_img_alpha.shape)
+        print(overlay_img_alpha)
         overlay_img_beta  = cv2.bitwise_not(overlay_img_alpha)
         overlay_img_alpha_norm = overlay_img_alpha / 255.0
         overlay_img_beta_norm  = overlay_img_beta  / 255.0
         global img
+        print(img.shape)
         img = cv2.add( cv2.multiply(overlay_img , overlay_img_alpha_norm ,dtype = 0) , cv2.multiply(img , overlay_img_beta_norm,dtype = 0) )
     return
 
@@ -92,12 +101,13 @@ foto_printer_name = "MITSUBISHI CP9550D/DW(USB)"
 paper_size = 5
 printer_name = pdf_printer_name
 # Start_state
-start_state = "scan"
+start_state = "idle"
 # ------ LOAD OVERLAYS ------
 roi_width_shift = int((new_overlay_size[0]-camera_resolution[0])/2)
-idle_overlay_img        = cv2.resize(cv2.imread(idle_overlay),new_overlay_size)[0:camera_resolution[1], roi_width_shift:roi_width_shift+camera_resolution[0]]
-idle_overlay_img_alpha  = cv2.resize(cv2.imread(idle_overlay_alpha),new_overlay_size)[0:camera_resolution[1], roi_width_shift:roi_width_shift+camera_resolution[0]]
-idle = (idle_overlay_img,idle_overlay_img_alpha)
+# idle_overlay_img        = cv2.resize(cv2.imread(idle_overlay),new_overlay_size)[0:camera_resolution[1], roi_width_shift:roi_width_shift+camera_resolution[0]]
+# idle_overlay_img_alpha  = cv2.resize(cv2.imread(idle_overlay_alpha),new_overlay_size)[0:camera_resolution[1], roi_width_shift:roi_width_shift+camera_resolution[0]]
+# idle = (idle_overlay_img,idle_overlay_img_alpha)
+idle = load_img(idle_overlay,camera_resolution)
 scan_overlay_img        = cv2.resize(cv2.imread(scan_overlay),new_overlay_size)[0:camera_resolution[1], roi_width_shift:roi_width_shift+camera_resolution[0]]
 scan_overlay_img_alpha  = cv2.resize(cv2.imread(scan_overlay_alpha),new_overlay_size)[0:camera_resolution[1], roi_width_shift:roi_width_shift+camera_resolution[0]]
 scan = (scan_overlay_img,scan_overlay_img_alpha)
@@ -119,6 +129,7 @@ cd_1 = (cd_1_overlay_img ,cd_1_overlay_img_alpha )
 cd = (cd_1,cd_2,cd_3)
 # ------ INIT --------
 my_window = "PhotoBooth" 
+v_shelve = shelve.open("Vouchers/data/vouchers")
 state = start_state
 countdown_val = 0
 overlay_img_file = ""
@@ -127,12 +138,10 @@ current_picture = 1
 nr_of_pictures = 4
 output_picture = []
 total_output_img = np.zeros((total_output_img_size[1],total_output_img_size[0],3),np.uint8)
-init_printer(printer_name,paper_size,win32con.DMORIENT_LANDSCAPE)
-v_shelve = shelve.open("Vouchers/data/vouchers")
 
-PRINTER_DEFAULTS = {"DesiredAccess":win32print.PRINTER_ALL_ACCESS} 
-printer = win32print.OpenPrinter(printer_name,PRINTER_DEFAULTS)
-print(get_printer_config(printer))
+init_printer(printer_name,paper_size,win32con.DMORIENT_LANDSCAPE)
+printer_handle,pHandle =  open_printer(printer_name)
+print(get_printer_config(printer_handle))
 
 cam = cv2.VideoCapture(0)
 cam.set(cv2.CAP_PROP_FRAME_WIDTH,camera_resolution[0])
@@ -210,6 +219,7 @@ while True:
         img = dummy
         state = "print"
     elif state == "print": 
+        print_image(printer_handle,"Output/picture_total.bmp",total_output_img_size)
         state = "end"
     elif state == "end":
         break
@@ -223,4 +233,5 @@ while True:
         v_shelve.close()
         break  # esc to quit
 cv2.destroyAllWindows()
+close_printer(printer_handle, pHandle)
 
