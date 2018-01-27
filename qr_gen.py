@@ -5,10 +5,9 @@ import cv2
 import numpy as np
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.units import cm
-from reportlab.lib.colors import black, white, pink, lightblue
+from reportlab.lib.colors import black, white, green, blue, red
 from reportlab.lib.pagesizes import A4
 import configparser
-
 
 def gen_vouchers_codes(name,nr):
     vouchers = []
@@ -18,11 +17,11 @@ def gen_vouchers_codes(name,nr):
         vouchers.append((voucher_hash,"NEW"))
     return vouchers
     
-def store_voucher_codes(vouchers, shelf_file):
-    config = configparser.ConfigParser()
-    config['VOUCHERS'] = dict(vouchers)
-    with open('Vouchers/data/vouchers', 'w') as configfile:
-        config.write(configfile)
+def store_voucher_codes(vouchers, shelve_file):
+    v_shelve = shelve.open(shelve_file,flag='n')
+    v_shelve.update({'num_vouchers':len(vouchers),'used_vouchers':0})
+    v_shelve.update(vouchers)
+    v_shelve.close()
     
 def qrcode_to_img(qr_code):
     row = []
@@ -73,10 +72,9 @@ def generate_voucher_pdf(pdf_file,voucher_codes,design):
         canv.showPage()
     canv.save()
 
-codes = gen_vouchers_codes("Toon",3)
-store_voucher_codes(codes,"Vouchers/data/vouchers")
-# design =(3.1,black,None,"Vouchers/Template/BickyBier.png")
-# generate_voucher_pdf("Vouchers/vouchers.pdf",codes,design)
-# print("done")
+def init_vouchers(key,num,voucher_path,design,v_pdf_path):
+    codes = gen_vouchers_codes(key,num)
+    store_voucher_codes(codes,voucher_path)
+    generate_voucher_pdf(v_pdf_path,codes,design)
 
 
