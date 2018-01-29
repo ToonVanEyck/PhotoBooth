@@ -179,3 +179,60 @@ INFO:root:---------- PhotoBooth started at 2018-01-27 12:29:07 ----------
 INFO:root:---------- PhotoBooth started at 2018-01-27 12:30:12 ----------
 INFO:root:---------- PhotoBooth started at 2018-01-27 12:31:26 ----------
 INFO:root:---------- PhotoBooth started at 2018-01-27 13:08:30 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 17:42:45 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:11:36 ----------
+WARNING:root:Overlays/example/idle.png Not found!
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:12:12 ----------
+WARNING:root:Overlays/example/idle.png Not found!
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:13:30 ----------
+WARNING:root:Overlays/example/accepted.png Not found!
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:13:53 ----------
+WARNING:root:Overlays/example/accept.png Not found!
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:14:57 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:15:21 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:21:11 ----------
+WARNING:root:Idle/1920x1080/pillar.png Not found!
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:24:55 ----------
+WARNING:root:${overlays_dir}/pillar.png Not found!
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:26:12 ----------
+WARNING:root:$(overlays_dir)/pillar.png Not found!
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:27:26 ----------
+WARNING:root:$(overlays_dir)/pillar.png Not found!
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:28:52 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:29:02 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:29:13 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:29:28 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:30:23 ----------
+WARNING:root:$(overlays_dir)s/pillar.png Not found!
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:33:36 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:34:39 ----------
+WARNING:root:$(overlays_dir)s/pillar.png Not found!
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:34:46 ----------
+WARNING:root:$(overlays_dir)s/pillar.png Not found!
+INFO:root:---------- PhotoBooth started at 2018-01-29 18:36:13 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 19:32:12 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 19:34:05 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 19:34:25 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 19:34:41 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 19:34:55 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 19:35:09 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 19:38:17 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 19:58:44 ----------
+WARNING:root:No valid 'mode' defined in config file.
+INFO:root:---------- PhotoBooth started at 2018-01-29 19:59:16 ----------
+WARNING:root:No valid 'mode' defined in config file.
+INFO:root:---------- PhotoBooth started at 2018-01-29 19:59:30 ----------
+WARNING:root:No valid 'mode' defined in config file.
+INFO:root:---------- PhotoBooth started at 2018-01-29 19:59:58 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 20:03:48 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 20:10:04 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 20:10:33 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 20:12:06 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 20:12:54 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 20:13:36 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 20:14:50 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 20:39:34 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 20:41:38 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 20:46:50 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 20:47:32 ----------
+INFO:root:---------- PhotoBooth started at 2018-01-29 20:53:06 ----------

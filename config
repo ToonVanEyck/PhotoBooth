@@ -2,6 +2,7 @@
 # GENERAL
 	# mode can be either "voucher" or "free"
 	mode            : free
+	#printer         : MITSUBISHI CP9550D/DW(USB)	
 	printer         : Microsoft Print to PDF
 	camera_res		: 640,480
 	display_res     : 1920,1080
@@ -12,17 +13,18 @@
 	accepted_t		: 3
 	denied_t		: 3
 # OVERLAYS
-	pillar_overlay  : Idle/1920x1080/pillar.png
-	idle_overlay    : Idle/1920x1080/totem.png
-	scan_overlay    : Idle/1920x1080/scan.png
-	accept_overlay  : Idle/1920x1080/accept.png
-	deny_overlay    : Idle/1920x1080/deny.png
-	countdown_dir   : Countdown/1920x1080/totem_
-	output_template : Print/9x6 inch/bicky_bier.png
+	overlays_dir	: Overlays/example
+	pillar_overlay  : ${overlays_dir}/pillar.png
+	idle_overlay    : ${overlays_dir}/idle.png
+	scan_overlay    : ${overlays_dir}/scan.png
+	accept_overlay  : ${overlays_dir}/accept.png
+	deny_overlay    : ${overlays_dir}/deny.png
+	countdown_dir   : ${overlays_dir}/
+	output_template : Print/2x6 inch/template.png
 # OUTPUT_PIC
-	media_format    : 5
-	img_sizes		: (1200,900)
-	img_origins     : (0,0), (900,0), (0,1500)
+	media_format    : 7
+	img_sizes		: (600,450)
+	img_origins     : (71,54), (667,54), (1263,54)
 	to_print        : Output/picture_total.bmp
 # VOUCHERS
 	voucher_path	: Vouchers/data/vouchers
@@ -33,7 +35,7 @@
 	color1			: 0,0,0
 	color2			: None	
 	qr_size         : 3
-	v_pdf_path : Vouchers/vouchers.pdf
+	v_pdf_path 		: Vouchers/vouchers.pdf
 
 #  media_format : x |   FOTO    |   PDF
 #-------------------+-----------+---------

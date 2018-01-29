@@ -72,19 +72,20 @@ logging.basicConfig(filename='photobooth.log',level=logging.DEBUG)
 start_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
 logging.info("---------- PhotoBooth started at "+start_time+" ----------")
 
-conf = configparser.ConfigParser()
+conf = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
 conf.read("config")
 conf = conf['conf']
 if conf['mode'] == "voucher":
-    state = "scan"
+    init_state = "scan"
 elif conf['mode'] == "free":
-    state = "idle"
+    init_state = "idle"
 else:
     logging.warning('No valid \'mode\' defined in config file.')
     exit()
-    
+state = init_state
+
 all_files_exist = True
-all_files_exist = all_files_exist and check_file_exists(conf['pillar_overlay'])
+all_files_exist = all_files_exist and check_file_exists(conf.get('pillar_overlay'))
 all_files_exist = all_files_exist and check_file_exists(conf['idle_overlay'])
 all_files_exist = all_files_exist and check_file_exists(conf['scan_overlay'])
 all_files_exist = all_files_exist and check_file_exists(conf['accept_overlay'])
@@ -123,7 +124,7 @@ init_printer(conf['printer'],conf.getint('media_format'),win32con.DMORIENT_PORTR
 printer_handle,pHandle =  open_printer(conf['printer'])
 pconfig = get_printer_config(printer_handle)
 print_img_size = (pconfig['PHYSICALWIDTH'],pconfig['PHYSICALHEIGHT'])
-
+print(pconfig)
 # Output template
 template_img_file = "Print/9x6 inch/bicky_bier.png"
 template_img_alpha_file = "Print/9x6 inch/bicky_bier_alpha.png"
@@ -247,7 +248,7 @@ while True:
         
     elif state == "print": 
         print_image(printer_handle,"Output/to_print.bmp",print_img_size)
-        state = "end"
+        state = init_state
     elif state == "end":
         break
     else:
