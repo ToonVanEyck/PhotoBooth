@@ -4,7 +4,7 @@
 	mode            : free
 	#printer         : MITSUBISHI CP9550D/DW(USB)	
 	printer         : Microsoft Print to PDF
-	camera_res		: 640,480
+	camera_res		: 1280,720
 	display_res     : 1920,1080
 	window_name		: PhotoBooth
 # TIMING

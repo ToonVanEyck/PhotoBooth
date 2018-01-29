@@ -9,7 +9,7 @@ import win32con
 import win32print
 from pyzbar.pyzbar import decode
 from pyzbar.pyzbar import ZBarSymbol
-from time import sleep
+from time import sleep, time
 import configparser
 import logging
 from time import gmtime, strftime
@@ -54,7 +54,7 @@ def overlay(img,over):
 
 def add_pillar(img,pillar):
     display_img=pillar
-    display_img[0:camera_resolution[1],roi_width_shift:camera_resolution[0]+roi_width_shift] = img  
+    display_img[0:corr_camera_resolution[1],roi_width_shift:corr_camera_resolution[0]+roi_width_shift] = img  
     return display_img
 
 def start(event, x, y, flags, param):
@@ -116,7 +116,9 @@ if conf.getint('num_v_generate') > 0:
 
 
 camera_resolution = make_tuple("("+conf['camera_res']+")")
-display_size      = make_tuple("("+conf['display_res']+")")
+corr_camera_resolution = (int(camera_resolution[1]*4/3),camera_resolution[1])
+camera_offset = int((camera_resolution[0]-corr_camera_resolution[0])/2)
+display_size  = make_tuple("("+conf['display_res']+")")
 camera_aspect_ratio = camera_resolution[0]/camera_resolution[1]
 display_aspect_ratio = (display_size[0]/display_size[1])
 
@@ -124,7 +126,6 @@ init_printer(conf['printer'],conf.getint('media_format'),win32con.DMORIENT_PORTR
 printer_handle,pHandle =  open_printer(conf['printer'])
 pconfig = get_printer_config(printer_handle)
 print_img_size = (pconfig['PHYSICALWIDTH'],pconfig['PHYSICALHEIGHT'])
-print(pconfig)
 # Output template
 template_img_file = "Print/9x6 inch/bicky_bier.png"
 template_img_alpha_file = "Print/9x6 inch/bicky_bier_alpha.png"
@@ -142,18 +143,17 @@ else:
     exit()
     
 
-
-
 total_size = (math.ceil(display_aspect_ratio*camera_resolution[1]),camera_resolution[1])
-roi_width_shift = int((total_size[0]-camera_resolution[0])/2)
+roi_width_shift = int((total_size[0]-corr_camera_resolution[0])/2)
+
 pillar   = load_img(conf['pillar_overlay'],total_size)
-idle     = load_img(conf['idle_overlay'],camera_resolution)
-scan     = load_img(conf['scan_overlay'],camera_resolution)
-accept   = load_img(conf['accept_overlay'],camera_resolution)
-deny     = load_img(conf['deny_overlay'],camera_resolution)
-cd_3     = load_img(conf['countdown_dir'] + "3.png",camera_resolution)
-cd_2     = load_img(conf['countdown_dir'] + "2.png",camera_resolution)
-cd_1     = load_img(conf['countdown_dir'] + "1.png",camera_resolution)
+idle     = load_img(conf['idle_overlay'],corr_camera_resolution)
+scan     = load_img(conf['scan_overlay'],corr_camera_resolution)
+accept   = load_img(conf['accept_overlay'],corr_camera_resolution)
+deny     = load_img(conf['deny_overlay'],corr_camera_resolution)
+cd_3     = load_img(conf['countdown_dir'] + "3.png",corr_camera_resolution)
+cd_2     = load_img(conf['countdown_dir'] + "2.png",corr_camera_resolution)
+cd_1     = load_img(conf['countdown_dir'] + "1.png",corr_camera_resolution)
 cd = (cd_1,cd_2,cd_3)
 template = load_img(conf['output_template'],None)
 display_img      = np.zeros((total_size[1],total_size[0],3),np.uint8)
@@ -177,10 +177,13 @@ cv2.setMouseCallback(conf['window_name'], start)
 #                                                 \ \| __/ _` | __/ _ \  /    \ / _` |/ __| '_ \| | '_ \ / _ \
 #                                                 _\ \ || (_| | ||  __/ / /\/\ \ (_| | (__| | | | | | | |  __/
 #                                                 \__/\__\__,_|\__\___| \/    \/\__,_|\___|_| |_|_|_| |_|\___|                                                          
+count = 1
+diff_time = 0
 while True:
+    start_time =  time()
     ret_val, capture = cam.read()
     img = cv2.flip(capture, 1)
-    
+    img = img [0:camera_resolution[1],camera_offset:corr_camera_resolution[0]+camera_offset]
     if state == "idle":
         overlay_img = idle 
         # got to next state by clicking screen => start()
@@ -261,7 +264,13 @@ while True:
         v_shelve.close()
         break  # esc to quit
     
-    
+    diff_time += time() - start_time
+    count += 1
+    if count == 30:
+        count = 1
+        diff_time /= 30
+        print("FPS:" +str(1/diff_time))
+        diff_time = 0
     
 cv2.destroyAllWindows()
 close_printer(printer_handle, pHandle)
