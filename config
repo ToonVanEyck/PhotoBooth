@@ -8,8 +8,8 @@
 	display_res     : 1920,1080
 	window_name		: PhotoBooth
 # TIMING
-	countdown_t		: 0.15
-	show_pic_t		: 0.1
+	countdown_t		: 1
+	show_pic_t		: 2
 	accepted_t		: 3
 	denied_t		: 3
 # OVERLAYS

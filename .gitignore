@@ -7,7 +7,10 @@
 __pycache__
 
 *.pdf
+
 Vouchers/data/*
+
 Output
-*.log
+
+photobooth.log
 

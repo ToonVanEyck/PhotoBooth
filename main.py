@@ -1,6 +1,6 @@
 import threading
-from threading import Thread
 import cv2
+import camera
 import shelve
 import numpy as np
 import math
@@ -17,42 +17,6 @@ from time import gmtime, strftime
 import os.path
 from ast import literal_eval as make_tuple
 import re
-
-class WebcamVideoStream:
-    def __init__(self, src=0):
-        # initialize the video camera stream and read the first frame
-        # from the stream
-        self.stream = cv2.VideoCapture(src)
-        self.stream.set(cv2.CAP_PROP_FRAME_WIDTH,camera_resolution[0])
-        self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT,camera_resolution[1])
-        (self.grabbed, self.frame) = self.stream.read()
- 
-        # initialize the variable used to indicate if the thread should
-        # be stopped
-        self.stopped = False
-        
-    def start(self):
-        # start the thread to read frames from the video stream
-        Thread(target=self.update, args=()).start()
-        return self
-     
-    def update(self):
-        # keep looping infinitely until the thread is stopped
-        while True:
-            # if the thread indicator variable is set, stop the thread
-            if self.stopped:
-                return
- 
-            # otherwise, read the next frame from the stream
-            (self.grabbed, self.frame) = self.stream.read()
- 
-    def read(self):
-        # return the frame most recently read
-        return self.frame
- 
-    def stop(self):
-        # indicate that the thread should be stopped
-        self.stopped = True
 
 
 def load_img(file,size):
@@ -200,7 +164,7 @@ countdown_val = 0
 current_picture = 0
 output_picture = []
 
-vc=WebcamVideoStream(src=0).start()
+vc=camera.WebcamVideoStream(camera_resolution,src=0).start()
 
 cv2.namedWindow(conf['window_name'],cv2.WINDOW_NORMAL)
 cv2.setWindowProperty(conf['window_name'],cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN);
