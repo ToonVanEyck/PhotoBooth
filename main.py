@@ -1,4 +1,5 @@
 import threading
+from threading import Thread
 import cv2
 import shelve
 import numpy as np
@@ -17,12 +18,50 @@ import os.path
 from ast import literal_eval as make_tuple
 import re
 
+class WebcamVideoStream:
+    def __init__(self, src=0):
+        # initialize the video camera stream and read the first frame
+        # from the stream
+        self.stream = cv2.VideoCapture(src)
+        self.stream.set(cv2.CAP_PROP_FRAME_WIDTH,camera_resolution[0])
+        self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT,camera_resolution[1])
+        (self.grabbed, self.frame) = self.stream.read()
+ 
+        # initialize the variable used to indicate if the thread should
+        # be stopped
+        self.stopped = False
+        
+    def start(self):
+        # start the thread to read frames from the video stream
+        Thread(target=self.update, args=()).start()
+        return self
+     
+    def update(self):
+        # keep looping infinitely until the thread is stopped
+        while True:
+            # if the thread indicator variable is set, stop the thread
+            if self.stopped:
+                return
+ 
+            # otherwise, read the next frame from the stream
+            (self.grabbed, self.frame) = self.stream.read()
+ 
+    def read(self):
+        # return the frame most recently read
+        return self.frame
+ 
+    def stop(self):
+        # indicate that the thread should be stopped
+        self.stopped = True
+
+
 def load_img(file,size):
     img= cv2.imread(file,cv2.IMREAD_UNCHANGED)
     if size != None:
         img = cv2.resize(img,size)
     x,y = img.shape[0:2]
-    return img[0:x,0:y,0:3],np.dstack((img[0:x,0:y,3],img[0:x,0:y,3],img[0:x,0:y,3]))
+    alpha = np.dstack((img[0:x,0:y,3],img[0:x,0:y,3],img[0:x,0:y,3]))
+    return cv2.multiply(img[0:x,0:y,0:3],alpha / 255.0,dtype = 0), cv2.bitwise_not(alpha) / 255.0
 
 def start_timer(time,func):
     t = threading.Timer(time,func)
@@ -45,11 +84,8 @@ def countdown():
 
 def overlay(img,over):
     if over != None:
-        overlay_img, overlay_img_alpha = over
-        overlay_img_beta  = cv2.bitwise_not(overlay_img_alpha)
-        overlay_img_alpha_norm = overlay_img_alpha / 255.0
-        overlay_img_beta_norm  = overlay_img_beta  / 255.0
-        img = cv2.add( cv2.multiply(overlay_img , overlay_img_alpha_norm ,dtype = 0) , cv2.multiply(img , overlay_img_beta_norm,dtype = 0) )
+        overlay_img, overlay_img_beta_norm = over
+        img = cv2.add(overlay_img  , cv2.multiply(img , overlay_img_beta_norm,dtype = 0) )
     return img
 
 def add_pillar(img,pillar):
@@ -164,12 +200,10 @@ countdown_val = 0
 current_picture = 0
 output_picture = []
 
+vc=WebcamVideoStream(src=0).start()
 
-cam = cv2.VideoCapture(0)
-cam.set(cv2.CAP_PROP_FRAME_WIDTH,camera_resolution[0])
-cam.set(cv2.CAP_PROP_FRAME_HEIGHT,camera_resolution[1])
-cv2.namedWindow(conf['window_name'])#,cv2.WINDOW_NORMAL) 
-#cv2.setWindowProperty(conf['window_name'],cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN);
+cv2.namedWindow(conf['window_name'],cv2.WINDOW_NORMAL)
+cv2.setWindowProperty(conf['window_name'],cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN);
 cv2.setMouseCallback(conf['window_name'], start)
 
 #                                                  __ _        _                           _     _            
@@ -181,7 +215,8 @@ count = 1
 diff_time = 0
 while True:
     start_time =  time()
-    ret_val, capture = cam.read()
+    #ret_val, capture = cam.read()
+    capture = vc.read()
     img = cv2.flip(capture, 1)
     img = img [0:camera_resolution[1],camera_offset:corr_camera_resolution[0]+camera_offset]
     if state == "idle":
@@ -274,4 +309,5 @@ while True:
     
 cv2.destroyAllWindows()
 close_printer(printer_handle, pHandle)
+vc.stop()
 exit()
