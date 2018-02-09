@@ -90,6 +90,7 @@ all_files_exist = all_files_exist and check_file_exists(conf['idle_overlay'])
 all_files_exist = all_files_exist and check_file_exists(conf['scan_overlay'])
 all_files_exist = all_files_exist and check_file_exists(conf['accept_overlay'])
 all_files_exist = all_files_exist and check_file_exists(conf['deny_overlay'])
+all_files_exist = all_files_exist and check_file_exists(conf['printing_overlay'])
 all_files_exist = all_files_exist and check_file_exists(conf['countdown_dir']+"1.png")
 all_files_exist = all_files_exist and check_file_exists(conf['countdown_dir']+"2.png")
 all_files_exist = all_files_exist and check_file_exists(conf['countdown_dir']+"3.png")
@@ -126,6 +127,8 @@ init_printer(conf['printer'],conf.getint('media_format'),win32con.DMORIENT_PORTR
 printer_handle,pHandle =  open_printer(conf['printer'])
 pconfig = get_printer_config(printer_handle)
 print_img_size = (pconfig['PHYSICALWIDTH'],pconfig['PHYSICALHEIGHT'])
+print(pconfig)
+
 # Output template
 template_img_file = "Print/9x6 inch/bicky_bier.png"
 template_img_alpha_file = "Print/9x6 inch/bicky_bier_alpha.png"
@@ -151,6 +154,7 @@ idle     = load_img(conf['idle_overlay'],corr_camera_resolution)
 scan     = load_img(conf['scan_overlay'],corr_camera_resolution)
 accept   = load_img(conf['accept_overlay'],corr_camera_resolution)
 deny     = load_img(conf['deny_overlay'],corr_camera_resolution)
+printing = load_img(conf['printing_overlay'],corr_camera_resolution)
 cd_3     = load_img(conf['countdown_dir'] + "3.png",corr_camera_resolution)
 cd_2     = load_img(conf['countdown_dir'] + "2.png",corr_camera_resolution)
 cd_1     = load_img(conf['countdown_dir'] + "1.png",corr_camera_resolution)
@@ -164,10 +168,10 @@ countdown_val = 0
 current_picture = 0
 output_picture = []
 
-vc=camera.WebcamVideoStream(camera_resolution,src=0).start()
+vc=camera.WebcamVideoStream(camera_resolution,src=1).start()
 
-cv2.namedWindow(conf['window_name'],cv2.WINDOW_NORMAL)
-cv2.setWindowProperty(conf['window_name'],cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN);
+cv2.namedWindow(conf['window_name'])#,cv2.WINDOW_NORMAL)
+#cv2.setWindowProperty(conf['window_name'],cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN);
 cv2.setMouseCallback(conf['window_name'], start)
 
 #                                                  __ _        _                           _     _            
@@ -179,10 +183,11 @@ count = 1
 diff_time = 0
 while True:
     start_time =  time()
-    #ret_val, capture = cam.read()
+    
     capture = vc.read()
-    img = cv2.flip(capture, 1)
-    img = img [0:camera_resolution[1],camera_offset:corr_camera_resolution[0]+camera_offset]
+    img = capture [0:camera_resolution[1],camera_offset:corr_camera_resolution[0]+camera_offset]
+    img = cv2.flip(img, 1)
+    
     if state == "idle":
         overlay_img = idle 
         # got to next state by clicking screen => start()
@@ -223,6 +228,7 @@ while True:
             state = "picture"
             
     elif state == "picture":
+        img=cv2.flip(img, 1)
         cv2.imwrite("Output/picture_"+str(current_picture)+".png",img)
         resized_img = cv2.resize(img, i_size[current_picture])
         output_picture.append(resized_img)
@@ -242,6 +248,11 @@ while True:
         for i in range(num_pictures):
             output_img[i_org[i][0]:i_org[i][0]+i_size[i][1], i_org[i][1]:i_org[i][1]+i_size[i][0]] = output_picture[i]
         output_img = overlay(output_img,template)
+        if True:
+            extended_img = np.zeros((template[0].shape[0],template[0].shape[1]*2,3),np.uint8)
+            extended_img[0:template[0].shape[0],0:template[0].shape[1]] = output_img
+            extended_img[0:template[0].shape[0],template[0].shape[1]:template[0].shape[1]*2] = output_img
+            output_img = extended_img
         if output_img.shape[0] < output_img.shape[1]:
             output_img = cv2.flip(output_img, 1)
             output_img = cv2.transpose(output_img)
@@ -250,7 +261,14 @@ while True:
         
     elif state == "print": 
         print_image(printer_handle,"Output/to_print.bmp",print_img_size)
-        state = init_state
+        state = "printing"
+        
+    elif state == "printing":
+        overlay_img = printing
+        printjobs = win32print.EnumJobs(pHandle, 0, 999)
+        if len(printjobs) == 0:
+            state = init_state
+    
     elif state == "end":
         break
     else:
@@ -270,6 +288,7 @@ while True:
         diff_time /= 30
         print("FPS:" +str(1/diff_time))
         diff_time = 0
+    
     
 cv2.destroyAllWindows()
 close_printer(printer_handle, pHandle)

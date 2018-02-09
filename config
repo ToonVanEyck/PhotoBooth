@@ -1,10 +1,10 @@
 [conf]
 # GENERAL
 	# mode can be either "voucher" or "free"
-	mode            : free
+	mode            : voucher
 	#printer         : MITSUBISHI CP9550D/DW(USB)	
 	printer         : Microsoft Print to PDF
-	camera_res		: 1280,720
+	camera_res		: 1920,1080
 	display_res     : 1920,1080
 	window_name		: PhotoBooth
 # TIMING
@@ -15,14 +15,15 @@
 # OVERLAYS
 	overlays_dir	: Overlays/example
 	pillar_overlay  : ${overlays_dir}/pillar.png
-	idle_overlay    : ${overlays_dir}/idle.png
+	idle_overlay    : ${overlays_dir}/idle_clear.png
 	scan_overlay    : ${overlays_dir}/scan.png
 	accept_overlay  : ${overlays_dir}/accept.png
 	deny_overlay    : ${overlays_dir}/deny.png
+	printing_overlay: ${overlays_dir}/printing.png
 	countdown_dir   : ${overlays_dir}/
 	output_template : Print/2x6 inch/template.png
 # OUTPUT_PIC
-	media_format    : 7
+	media_format    : 6
 	img_sizes		: (600,450)
 	img_origins     : (71,54), (667,54), (1263,54)
 	to_print        : Output/picture_total.bmp
