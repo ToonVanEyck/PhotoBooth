@@ -72,9 +72,9 @@ logging.basicConfig(filename='photobooth.log',level=logging.DEBUG)
 start_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
 logging.info("---------- PhotoBooth started at "+start_time+" ----------")
 
-conf = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
-conf.read("config")
-conf = conf['conf']
+config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
+config.read("config")
+conf = config['conf']
 if conf['mode'] == "voucher":
     init_state = "scan"
 elif conf['mode'] == "free":
@@ -118,13 +118,26 @@ if conf.getint('num_v_generate') > 0:
 
 camera_resolution = make_tuple("("+conf['camera_res']+")")
 corr_camera_resolution = (int(camera_resolution[1]*4/3),camera_resolution[1])
+
 camera_offset = int((camera_resolution[0]-corr_camera_resolution[0])/2)
 display_size  = make_tuple("("+conf['display_res']+")")
 camera_aspect_ratio = camera_resolution[0]/camera_resolution[1]
 display_aspect_ratio = (display_size[0]/display_size[1])
+total_size = (math.ceil(display_aspect_ratio*camera_resolution[1]),camera_resolution[1])
+roi_width_shift = int((total_size[0]-corr_camera_resolution[0])/2)
 
-init_printer(conf['printer'],conf.getint('media_format'),win32con.DMORIENT_PORTRAIT)
-printer_handle,pHandle =  open_printer(conf['printer'])
+print("camera resolution: " + str(camera_resolution))
+print("corr camera resolution: " +  str(corr_camera_resolution))
+print("display resolution: " + str(display_size))
+print("total img size: " +  str(total_size))
+print("camera aspect ratio: " +  str(camera_aspect_ratio))
+print("display aspect ratio: " +  str(display_aspect_ratio))
+
+printer_name = conf['printer']
+if config.has_option('conf','use_debug_printer'):
+   printer_name = conf['use_debug_printer']
+init_printer(printer_name,conf.getint('media_format'),win32con.DMORIENT_PORTRAIT)
+printer_handle,pHandle =  open_printer(printer_name)
 pconfig = get_printer_config(printer_handle)
 print_img_size = (pconfig['PHYSICALWIDTH'],pconfig['PHYSICALHEIGHT'])
 print(pconfig)
@@ -145,10 +158,6 @@ else:
     logging.warning('Not enough img_sizes specified, need 1 or '+str(num_pictures)+"!")
     exit()
     
-
-total_size = (math.ceil(display_aspect_ratio*camera_resolution[1]),camera_resolution[1])
-roi_width_shift = int((total_size[0]-corr_camera_resolution[0])/2)
-
 pillar   = load_img(conf['pillar_overlay'],total_size)
 idle     = load_img(conf['idle_overlay'],corr_camera_resolution)
 scan     = load_img(conf['scan_overlay'],corr_camera_resolution)
@@ -166,12 +175,17 @@ display_img      = np.zeros((total_size[1],total_size[0],3),np.uint8)
 v_shelve = shelve.open(conf['voucher_path'])
 countdown_val = 0
 current_picture = 0
-output_picture = []
+output_picture = [0,0,0]
 
-vc=camera.WebcamVideoStream(camera_resolution,src=1).start()
+cam = cv2.VideoCapture(0)
+cam.set(cv2.CAP_PROP_FRAME_WIDTH,camera_resolution[0])
+cam.set(cv2.CAP_PROP_FRAME_HEIGHT,camera_resolution[1])
+print(cam.get(cv2.CAP_PROP_FRAME_WIDTH),cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-cv2.namedWindow(conf['window_name'])#,cv2.WINDOW_NORMAL)
-#cv2.setWindowProperty(conf['window_name'],cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN);
+vc=camera.WebcamVideoStream(cam).start()
+
+cv2.namedWindow(conf['window_name'],cv2.WINDOW_NORMAL)
+cv2.setWindowProperty(conf['window_name'],cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN);
 cv2.setMouseCallback(conf['window_name'], start)
 
 #                                                  __ _        _                           _     _            
@@ -186,7 +200,7 @@ while True:
     
     capture = vc.read()
     img = capture [0:camera_resolution[1],camera_offset:corr_camera_resolution[0]+camera_offset]
-    img = cv2.flip(img, 1)
+    img = cv2.flip(img, 0)
     
     if state == "idle":
         overlay_img = idle 
@@ -231,7 +245,7 @@ while True:
         img=cv2.flip(img, 1)
         cv2.imwrite("Output/picture_"+str(current_picture)+".png",img)
         resized_img = cv2.resize(img, i_size[current_picture])
-        output_picture.append(resized_img)
+        output_picture[current_picture]=(resized_img)
         current_picture+=1
         show_img = overlay(img,None)
         show_img = add_pillar(show_img, pillar[0])
@@ -244,15 +258,12 @@ while True:
             state = "process"
             
     elif state == "process":
-        output_img = np.zeros((template[0].shape[0],template[0].shape[1],3),np.uint8)
+        output_img = np.ones((template[0].shape[0],template[0].shape[1],3),np.uint8)
+        output_img *= 255
         for i in range(num_pictures):
             output_img[i_org[i][0]:i_org[i][0]+i_size[i][1], i_org[i][1]:i_org[i][1]+i_size[i][0]] = output_picture[i]
+            output_img[i_org[i][0]:i_org[i][0]+i_size[i][1], int(i_org[i][1]+template[0].shape[1]/2):int(i_org[i][1]+i_size[i][0]+template[0].shape[1]/2)] = output_picture[i]
         output_img = overlay(output_img,template)
-        if True:
-            extended_img = np.zeros((template[0].shape[0],template[0].shape[1]*2,3),np.uint8)
-            extended_img[0:template[0].shape[0],0:template[0].shape[1]] = output_img
-            extended_img[0:template[0].shape[0],template[0].shape[1]:template[0].shape[1]*2] = output_img
-            output_img = extended_img
         if output_img.shape[0] < output_img.shape[1]:
             output_img = cv2.flip(output_img, 1)
             output_img = cv2.transpose(output_img)
@@ -273,6 +284,7 @@ while True:
         break
     else:
         pass
+    
     img = overlay(img,overlay_img)
     img = add_pillar(img, pillar[0])
     cv2.imshow(conf['window_name'],img)

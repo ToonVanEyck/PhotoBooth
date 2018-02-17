@@ -1,15 +1,10 @@
 from threading import Thread
-import cv2
+from pyzbar.pyzbar import decode
+from pyzbar.pyzbar import ZBarSymbol
+import shelve
 
-class WebcamVideoStream:
-    def __init__(self,cam):
-        # initialize the video camera stream and read the first frame
-        # from the stream
-        self.stream = cam
-        (self.grabbed, self.frame) = self.stream.read()
- 
-        # initialize the variable used to indicate if the thread should
-        # be stopped
+class QRScanner:
+    def __init__(self,v_shelve):
         self.stopped = False
         
     def start(self):
@@ -25,12 +20,14 @@ class WebcamVideoStream:
                 return
  
             # otherwise, read the next frame from the stream
-            (self.grabbed, self.frame) = self.stream.read()
+            
  
     def read(self):
         # return the frame most recently read
-        return self.frame
+        return self.valid
  
+
     def stop(self):
         # indicate that the thread should be stopped
         self.stopped = True
+        
