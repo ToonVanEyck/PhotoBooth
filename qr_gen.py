@@ -9,6 +9,7 @@ from reportlab.lib.colors import black, white, green, blue, red
 from reportlab.lib.pagesizes import A4
 import configparser
 
+
 def gen_vouchers_codes(name,nr):
     vouchers = []
     for x in range(0, nr):
@@ -71,6 +72,7 @@ def generate_voucher_pdf(pdf_file,voucher_codes,design):
             draw_qr_code(canv,qr_img,qr_size,qr_origin,color1,color2)
         canv.showPage()
     canv.save()
+
 
 def init_vouchers(key,num,voucher_path,design,v_pdf_path):
     codes = gen_vouchers_codes(key,num)

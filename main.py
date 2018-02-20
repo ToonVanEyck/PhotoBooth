@@ -17,6 +17,7 @@ from time import gmtime, strftime
 import os.path
 from ast import literal_eval as make_tuple
 import re
+from numpy.distutils.fcompiler import none
 
 
 def load_img(file,size):
@@ -68,6 +69,12 @@ def check_file_exists(fname):
         return False
     return True
 
+def check_dir_exists(dname):
+    if os.path.isdir(dname) == False:
+        logging.warning(dname+' Not found!')
+        return False
+    return True
+
 logging.basicConfig(filename='photobooth.log',level=logging.DEBUG)
 start_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
 logging.info("---------- PhotoBooth started at "+start_time+" ----------")
@@ -98,6 +105,12 @@ all_files_exist = all_files_exist and check_file_exists(conf['output_template'])
 all_files_exist = all_files_exist and check_file_exists(conf['voucher_template'])
 if all_files_exist == False:
     exit()
+    
+save_to = None    
+if config.has_option('conf','store_img_dir'):
+    if not check_dir_exists(conf['store_img_dir']):
+        exit()
+    save_to = conf['store_img_dir']
     
 if conf.getint('num_v_generate') > 0:
     color1 = conf['color1']
@@ -188,6 +201,7 @@ cv2.namedWindow(conf['window_name'],cv2.WINDOW_NORMAL)
 cv2.setWindowProperty(conf['window_name'],cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN);
 cv2.setMouseCallback(conf['window_name'], start)
 
+
 #                                                  __ _        _                           _     _            
 #                                                 / _\ |_ __ _| |_ ___    /\/\   __ _  ___| |__ (_)_ __   ___ 
 #                                                 \ \| __/ _` | __/ _ \  /    \ / _` |/ __| '_ \| | '_ \ / _ \
@@ -243,7 +257,8 @@ while True:
             
     elif state == "picture":
         img=cv2.flip(img, 1)
-        cv2.imwrite("Output/picture_"+str(current_picture)+".png",img)
+        if save_to != None:
+            cv2.imwrite(save_to+"/"+conf['voucher_key']+"_"+strftime("%y%m%d_%H%M%S", gmtime())+".png",img)
         resized_img = cv2.resize(img, i_size[current_picture])
         output_picture[current_picture]=(resized_img)
         current_picture+=1
@@ -284,7 +299,6 @@ while True:
         break
     else:
         pass
-    
     img = overlay(img,overlay_img)
     img = add_pillar(img, pillar[0])
     cv2.imshow(conf['window_name'],img)

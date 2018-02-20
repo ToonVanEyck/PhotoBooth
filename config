@@ -1,15 +1,17 @@
 [conf]
 # GENERAL
 	# mode can be either "voucher" or "free"
-	mode            : voucher
+	mode            : free
 	printer         : MITSUBISHI CP9550D/DW(USB)	
-	#use_debug_printer	: Microsoft Print to PDF
-	camera_res		: 1920,1080
+	use_debug_printer	: Microsoft Print to PDF
+	#camera_res		: 1920,1080
+	camera_res		: 640,480
+	#display_res		: 1280,960
 	display_res     : 1280,960
 	window_name		: PhotoBooth
 # TIMING
-	countdown_t		: 0.1
-	show_pic_t		: 0.2
+	countdown_t		: 1
+	show_pic_t		: 2
 	accepted_t		: 3
 	denied_t		: 3
 # OVERLAYS
@@ -23,6 +25,7 @@
 	countdown_dir   : ${overlays_dir}/
 	output_template : Print/2x6 inch/cheesytemplate.png
 # OUTPUT_PIC
+	store_img_dir	: C:/Users/Toon/Pictures/PhotoBooth_output
 	media_format    : 6
 	img_sizes		: (594,460)
 	img_origins     : (204,59), (703,59), (1202,59)
@@ -30,8 +33,8 @@
 # VOUCHERS
 	voucher_path	: Vouchers/data/vouchers
 	num_v_generate	: 0
-	voucher_key		: PhotoBooth
-	voucher_template: Vouchers/Template/BickyBier.png
+	voucher_key		: BickyBier
+	voucher_template: Vouchers/Template/CheesyVoucher.png
 	# color as R,G,B  (0-255)
 	color1			: 0,0,0
 	color2			: None	
