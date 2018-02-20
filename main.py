@@ -18,6 +18,8 @@ import os.path
 from ast import literal_eval as make_tuple
 import re
 from numpy.distutils.fcompiler import none
+from tkinter.constants import EW
+from win32con import EWX_FORCE
 
 
 def load_img(file,size):
@@ -201,7 +203,7 @@ cv2.namedWindow(conf['window_name'],cv2.WINDOW_NORMAL)
 cv2.setWindowProperty(conf['window_name'],cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN);
 cv2.setMouseCallback(conf['window_name'], start)
 
-
+print(str(v_shelve['used_vouchers'])+"/"+str(v_shelve['num_vouchers']))
 #                                                  __ _        _                           _     _            
 #                                                 / _\ |_ __ _| |_ ___    /\/\   __ _  ___| |__ (_)_ __   ___ 
 #                                                 \ \| __/ _` | __/ _ \  /    \ / _` |/ __| '_ \| | '_ \ / _ \
@@ -282,6 +284,8 @@ while True:
         if output_img.shape[0] < output_img.shape[1]:
             output_img = cv2.flip(output_img, 1)
             output_img = cv2.transpose(output_img)
+        
+        output_img = cv2.copyMakeBorder(output_img, 44,37,10,15,cv2.BORDER_CONSTANT)#BORDER_REPLICATE)#top,bot,left,right
         cv2.imwrite("Output/to_print.bmp",output_img)
         state = "print"
         

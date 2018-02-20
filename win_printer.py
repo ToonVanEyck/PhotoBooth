@@ -37,6 +37,8 @@ def get_printer_config(printer_handle):
     config = {
         'PHYSICALWIDTH': win32print.GetDeviceCaps(printer_handle, win32con.PHYSICALWIDTH),
         'PHYSICALHEIGHT': win32print.GetDeviceCaps(printer_handle, win32con.PHYSICALHEIGHT),
+        'PHYSICALOFFSETX': win32print.GetDeviceCaps(printer_handle, win32con.PHYSICALOFFSETX),
+        'PHYSICALOFFSETY': win32print.GetDeviceCaps(printer_handle, win32con.PHYSICALOFFSETY),
         'HORZSIZE': win32print.GetDeviceCaps(printer_handle, win32con.HORZSIZE),
         'VERTSIZE': win32print.GetDeviceCaps(printer_handle, win32con.VERTSIZE),
         'HORZRES': win32print.GetDeviceCaps(printer_handle, win32con.HORZRES),
