@@ -141,12 +141,12 @@ display_aspect_ratio = (display_size[0]/display_size[1])
 total_size = (math.ceil(display_aspect_ratio*camera_resolution[1]),camera_resolution[1])
 roi_width_shift = int((total_size[0]-corr_camera_resolution[0])/2)
 
-print("camera resolution: " + str(camera_resolution))
-print("corr camera resolution: " +  str(corr_camera_resolution))
-print("display resolution: " + str(display_size))
-print("total img size: " +  str(total_size))
-print("camera aspect ratio: " +  str(camera_aspect_ratio))
-print("display aspect ratio: " +  str(display_aspect_ratio))
+# print("camera resolution: " + str(camera_resolution))
+# print("corr camera resolution: " +  str(corr_camera_resolution))
+# print("display resolution: " + str(display_size))
+# print("total img size: " +  str(total_size))
+# print("camera aspect ratio: " +  str(camera_aspect_ratio))
+# print("display aspect ratio: " +  str(display_aspect_ratio))
 
 printer_name = conf['printer']
 if config.has_option('conf','use_debug_printer'):
@@ -156,22 +156,6 @@ printer_handle,pHandle =  open_printer(printer_name)
 pconfig = get_printer_config(printer_handle)
 print_img_size = (pconfig['PHYSICALWIDTH'],pconfig['PHYSICALHEIGHT'])
 print(pconfig)
-
-# Output template
-template_img_file = "Print/9x6 inch/bicky_bier.png"
-template_img_alpha_file = "Print/9x6 inch/bicky_bier_alpha.png"
-
-m=re.findall("\d+.?\d+",conf['img_origins'])
-i_org  = [make_tuple(x) for x in m]
-num_pictures = len(i_org)
-m=re.findall("\d+.?\d+",conf['img_sizes'])
-if len(m) == 1:
-    i_size = [make_tuple(m[0]) for i in range(num_pictures)]
-elif len(m) == num_pictures:
-    i_size = [make_tuple(x) for x in m]
-else:
-    logging.warning('Not enough img_sizes specified, need 1 or '+str(num_pictures)+"!")
-    exit()
     
 pillar   = load_img(conf['pillar_overlay'],total_size)
 idle     = load_img(conf['idle_overlay'],corr_camera_resolution)
@@ -186,11 +170,26 @@ cd = (cd_1,cd_2,cd_3)
 template = load_img(conf['output_template'],None)
 display_img      = np.zeros((total_size[1],total_size[0],3),np.uint8)
 
+m=re.findall("\d+.?\d+",conf['img_origins'])
+i_org  = [make_tuple(c_org) for c_org in m]
+i_org = [(t[1], t[0]) for t in i_org] #swap x and y inkscape to openCV coordinate system
+num_pictures = len(i_org)
+m=re.findall("\d+.?\d+",conf['img_sizes'])
+if len(m) == 1:
+    i_size = [make_tuple(m[0]) for i in range(num_pictures)]
+elif len(m) == num_pictures:
+    i_size = [make_tuple(c_size) for c_size in m]
+else:
+    logging.warning('Not enough img_sizes specified, need 1 or '+str(num_pictures)+"!")
+    exit()
+
+i_org = [(template[0].shape[0] - i_org[i][0] - i_size[i][1], i_org[i][1]) for i in range(num_pictures)]
+
 # ------ INIT --------
 v_shelve = shelve.open(conf['voucher_path'])
 countdown_val = 0
 current_picture = 0
-output_picture = [0,0,0]
+output_picture =  [0 for i in range(num_pictures)]
 
 cam = cv2.VideoCapture(0)
 cam.set(cv2.CAP_PROP_FRAME_WIDTH,camera_resolution[0])
@@ -285,7 +284,7 @@ while True:
             output_img = cv2.flip(output_img, 1)
             output_img = cv2.transpose(output_img)
         
-        output_img = cv2.copyMakeBorder(output_img, 44,37,10,15,cv2.BORDER_CONSTANT)#BORDER_REPLICATE)#top,bot,left,right
+        output_img = cv2.copyMakeBorder(output_img, 44,37,10,15,cv2.BORDER_REPLICATE)#top,bot,left,right
         cv2.imwrite("Output/to_print.bmp",output_img)
         state = "print"
         

@@ -3,7 +3,7 @@
 	# mode can be either "voucher" or "free"
 	mode            : free
 	printer         : MITSUBISHI CP9550D/DW(USB)	
-	#use_debug_printer	: Microsoft Print to PDF
+	use_debug_printer	: Microsoft Print to PDF
 	#camera_res		: 1920,1080
 	camera_res		: 640,480
 	#display_res		: 1280,960
@@ -23,12 +23,12 @@
 	deny_overlay    : ${overlays_dir}/deny.png
 	printing_overlay: ${overlays_dir}/printing.png
 	countdown_dir   : ${overlays_dir}/
-	output_template : Print/2x6 inch/test.png
 # OUTPUT_PIC
-	store_img_dir	: C:/Users/Toon/Pictures/PhotoBooth_output
+	store_img_dir	: C:/Users/Cheesy Pic/Pictures/PhotoBooth_output
 	media_format    : 6
-	img_sizes		: (594,460)
-	img_origins     : (204,59), (703,59), (1202,59)
+	output_template : Print/2x6 inch/BickyBier.png
+	img_sizes		: (608,456)
+	img_origins     : (48,1514), (50,1027), (50,538)
 	to_print        : Output/picture_total.bmp
 # VOUCHERS
 	voucher_path	: Vouchers/data/vouchers
