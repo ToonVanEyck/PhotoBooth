@@ -30,6 +30,7 @@ class QRScanner:
  
 
     def stop(self):
+        self.stream.stop()
         # indicate that the thread should be stopped
         self.stopped = True
         

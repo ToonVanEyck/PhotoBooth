@@ -1,11 +1,10 @@
 [conf]
 # GENERAL
 	# mode can be either "voucher" or "free"
-	mode            : free
+	mode            : voucher
 	printer         : MITSUBISHI CP9550D/DW(USB)	
 	use_debug_printer	: Microsoft Print to PDF
 	camera_res		: 1920,1080
-	#camera_res		: 640,480
 	#display_res		: 1280,960
 	display_res     : 1280,960
 	window_name		: PhotoBooth
@@ -24,7 +23,7 @@
 	printing_overlay: ${overlays_dir}/printing.png
 	countdown_dir   : ${overlays_dir}/
 # OUTPUT_PIC
-	store_img_dir	: C:/Users/Cheesy Pic/Pictures/PhotoBooth_output
+	store_img_dir	: C:/Users/Toon/Pictures/PhotoBooth_output
 	media_format    : 6
 	output_template : Print/2x6 inch/BickyBier.png
 	img_sizes		: (608,456)
