@@ -1,7 +1,7 @@
 [conf]
 # GENERAL
 	# mode can be either "voucher" or "free"
-	mode            : voucher
+	mode            : free
 	printer         : MITSUBISHI CP9550D/DW(USB)	
 	use_debug_printer	: Microsoft Print to PDF
 	camera_res		: 1920,1080
@@ -9,8 +9,8 @@
 	display_res     : 1280,960
 	window_name		: PhotoBooth
 # TIMING
-	countdown_t		: 0.1
-	show_pic_t		: 0.2
+	countdown_t		: 1
+	show_pic_t		: 2
 	accepted_t		: 3
 	denied_t		: 3
 # OVERLAYS

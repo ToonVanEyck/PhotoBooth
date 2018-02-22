@@ -42,6 +42,10 @@ def goto_scan():
 def goto_init_countdown():
     global state
     state = "init_countdown"
+    
+def goto_process():
+    global state
+    state = "process"
 
 def countdown():
     global countdown_val
@@ -213,10 +217,10 @@ count = 1
 diff_time = 0
 while True:
     start_time =  time()
-    
-    capture = vc.read()
-    img = capture [0:camera_resolution[1],camera_offset:corr_camera_resolution[0]+camera_offset]
-    img = cv2.flip(img, 0)
+    if state:
+        capture = vc.read()
+        img = capture [0:camera_resolution[1],camera_offset:corr_camera_resolution[0]+camera_offset]
+        img = cv2.flip(img, 0)
     
     if state == "idle":
         overlay_img = idle 
@@ -266,16 +270,13 @@ while True:
         resized_img = cv2.resize(img, i_size[current_picture])
         output_picture[current_picture]=(resized_img)
         current_picture+=1
-        show_img = overlay(img,None)
-        show_img = add_pillar(show_img, pillar[0])
-        cv2.imshow(conf['window_name'], show_img)
-        sleep(conf.getfloat('show_pic_t'))
         if current_picture < num_pictures:
-            state = "init_countdown"
+            start_timer(conf.getfloat('show_pic_t'),goto_init_countdown)
         else:
             current_picture = 0
-            state = "process"
-            
+            start_timer(conf.getfloat('show_pic_t'),goto_process)
+        state = 0
+        
     elif state == "process":
         output_img = np.ones((template[0].shape[0],template[0].shape[1],3),np.uint8)
         output_img *= 255
