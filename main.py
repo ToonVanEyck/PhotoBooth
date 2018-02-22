@@ -1,6 +1,7 @@
 import threading
 import cv2
 import camera
+import qr_scan
 import shelve
 import numpy as np
 import math
@@ -197,7 +198,7 @@ cam.set(cv2.CAP_PROP_FRAME_HEIGHT,camera_resolution[1])
 print(cam.get(cv2.CAP_PROP_FRAME_WIDTH),cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
 vc=camera.WebcamVideoStream(cam).start()
-
+#qr_scanner = qr_scan.QRScanner(vc).start()
 cv2.namedWindow(conf['window_name'],cv2.WINDOW_NORMAL)
 cv2.setWindowProperty(conf['window_name'],cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN);
 cv2.setMouseCallback(conf['window_name'], start)
@@ -223,17 +224,19 @@ while True:
         
     elif state == "scan":
         overlay_img = scan 
+        #code = qr_scanner.read()
         code = decode(capture,symbols=[ZBarSymbol.QRCODE])
         if len(code) == 1:
-            if v_shelve[code[0].data.decode("utf-8")] == "NEW":
-                v_shelve[code[0].data.decode("utf-8")] = "USED"
-                v_shelve['used_vouchers'] = v_shelve['used_vouchers'] + 1
-                v_shelve.sync()
-                print(str(v_shelve['used_vouchers'])+"/"+str(v_shelve['num_vouchers']))
-                state = "scan_accept"
-            else:
-                state = "scan_deny"
-                
+            print(code)
+#             if v_shelve[code[0].data.decode("utf-8")] == "NEW":
+#                 v_shelve[code[0].data.decode("utf-8")] = "USED"
+#                 v_shelve['used_vouchers'] = v_shelve['used_vouchers'] + 1
+#                 v_shelve.sync()
+#                 print(str(v_shelve['used_vouchers'])+"/"+str(v_shelve['num_vouchers']))
+#                 state = "scan_accept"
+#             else:
+#                 state = "scan_deny"
+#                 
     elif state == "scan_accept":
         overlay_img = accept 
         start_timer(3,goto_init_countdown)

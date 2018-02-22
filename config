@@ -4,8 +4,8 @@
 	mode            : free
 	printer         : MITSUBISHI CP9550D/DW(USB)	
 	use_debug_printer	: Microsoft Print to PDF
-	#camera_res		: 1920,1080
-	camera_res		: 640,480
+	camera_res		: 1920,1080
+	#camera_res		: 640,480
 	#display_res		: 1280,960
 	display_res     : 1280,960
 	window_name		: PhotoBooth

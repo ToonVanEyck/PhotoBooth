@@ -4,7 +4,9 @@ from pyzbar.pyzbar import ZBarSymbol
 import shelve
 
 class QRScanner:
-    def __init__(self,v_shelve):
+    def __init__(self, vc):
+        self.stream = vc
+        self.code = decode(self.stream.read(),symbols=[ZBarSymbol.QRCODE])
         self.stopped = False
         
     def start(self):
@@ -20,11 +22,11 @@ class QRScanner:
                 return
  
             # otherwise, read the next frame from the stream
-            
+            self.code = decode(self.stream.read(),symbols=[ZBarSymbol.QRCODE])
  
     def read(self):
         # return the frame most recently read
-        return self.valid
+        return self.code
  
 
     def stop(self):
